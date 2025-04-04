@@ -2,9 +2,15 @@
 pragma solidity >=0.7.5;
 pragma abicoder v2;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721Metadata.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol";
+// import "@openzeppelin/contracts/token/ERC721/IERC721Metadata.sol";
+// import "@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol";
+// import "../../../lib/openzeppelin-contracts/contracts/interfaces/IERC721Metadata.sol";
 
+import "../../../../openzeppelin-contracts/contracts/interfaces/IERC721Metadata.sol";
+import "../../../../openzeppelin-contracts/contracts/interfaces/IERC721Enumerable.sol";
+
+// import "../../../../openzeppelin-contracts/contracts/token/ERC721/IERC721Metadata.sol";
+// import "../../../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Enumerable.sol";
 import "./IERC721Permit.sol";
 import "./IERC4906.sol";
 import "./IPeripheryPayments.sol";

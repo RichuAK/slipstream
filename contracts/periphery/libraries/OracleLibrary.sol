@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.5.0 <0.8.0;
+pragma solidity ^0.8.0;
 
-import "contracts/core/libraries/FullMath.sol";
-import "contracts/core/libraries/TickMath.sol";
+import {FullMath} from "../../../../uni-v3-lib/src/FullMath.sol";
+import {TickMath} from "../../../../uni-v3-lib/src/TickMath.sol";
 import "contracts/core/interfaces/ICLPool.sol";
 
 /// @title Oracle library
@@ -31,9 +31,15 @@ library OracleLibrary {
         uint160 secondsPerLiquidityCumulativesDelta =
             secondsPerLiquidityCumulativeX128s[1] - secondsPerLiquidityCumulativeX128s[0];
 
-        arithmeticMeanTick = int24(tickCumulativesDelta / secondsAgo);
-        // Always round to negative infinity
-        if (tickCumulativesDelta < 0 && (tickCumulativesDelta % secondsAgo != 0)) arithmeticMeanTick--;
+        // Changed from:
+        // arithmeticMeanTick = int24(tickCumulativesDelta / secondsAgo);
+        // To:
+        arithmeticMeanTick = int24(tickCumulativesDelta / int56(uint56(secondsAgo)));
+        
+        // Changed from:
+        // if (tickCumulativesDelta < 0 && (tickCumulativesDelta % secondsAgo != 0)) arithmeticMeanTick--;
+        // To:
+        if (tickCumulativesDelta < 0 && (tickCumulativesDelta % int56(uint56(secondsAgo)) != 0)) arithmeticMeanTick--;
 
         // We are multiplying here instead of shifting to ensure that harmonicMeanLiquidity doesn't overflow uint128
         uint192 secondsAgoX160 = uint192(secondsAgo) * type(uint160).max;
@@ -115,7 +121,10 @@ library OracleLibrary {
         require(prevInitialized, "ONI");
 
         uint32 delta = observationTimestamp - prevObservationTimestamp;
-        tick = int24((tickCumulative - prevTickCumulative) / delta);
+        // Changed from:
+        // tick = int24((tickCumulative - prevTickCumulative) / delta);
+        // To:
+        tick = int24((tickCumulative - prevTickCumulative) / int56(uint56(delta)));
         uint128 liquidity = uint128(
             (uint192(delta) * type(uint160).max)
                 / (uint192(secondsPerLiquidityCumulativeX128 - prevSecondsPerLiquidityCumulativeX128) << 32)
@@ -148,7 +157,10 @@ library OracleLibrary {
 
         // Products fit in 152 bits, so it would take an array of length ~2**104 to overflow this logic
         for (uint256 i; i < weightedTickData.length; i++) {
-            numerator += weightedTickData[i].tick * int256(weightedTickData[i].weight);
+            // Changed from:
+            // numerator += weightedTickData[i].tick * int256(weightedTickData[i].weight);
+            // To:
+            numerator += weightedTickData[i].tick * int256(uint256(weightedTickData[i].weight));
             denominator += weightedTickData[i].weight;
         }
 
